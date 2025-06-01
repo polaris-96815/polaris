@@ -1,0 +1,16 @@
+body {
+  text-align: center;
+  font-family: Arial;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  grid-gap: 5px;
+  justify-content: center;
+  margin-top: 20px;
+}
+.grid img {
+  width: 100px;
+  height: 100px;
+  background-color: lightgray;
+}
