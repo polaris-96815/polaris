@@ -1,22 +1,30 @@
-const totalPieces = 9;
 const urlParams = new URLSearchParams(window.location.search);
-const id = urlParams.get('id');
+const pieceId = urlParams.get("id");
+let checkedPieces = JSON.parse(localStorage.getItem("checkedPieces") || "[]");
 
-let revealed = JSON.parse(localStorage.getItem('revealed') || '[]');
-
-if (id && !revealed.includes(id)) {
-  revealed.push(id);
-  localStorage.setItem('revealed', JSON.stringify(revealed));
+if (pieceId && !checkedPieces.includes(pieceId)) {
+  checkedPieces.push(pieceId);
+  localStorage.setItem("checkedPieces", JSON.stringify(checkedPieces));
 }
 
-const grid = document.getElementById('imageGrid');
+const puzzleContainer = document.getElementById("puzzle");
+checkedPieces.sort().forEach(id => {
+  const img = document.createElement("img");
+  img.src = `piece${id}.webp`;
+  puzzleContainer.appendChild(img);
+});
 
-for (let i = 1; i <= totalPieces; i++) {
-  const img = document.createElement('img');
-  if (revealed.includes(i.toString())) {
-    img.src = `part${i}.png`;
-  } else {
-    img.src = 'hidden.jpg';
-  }
-  grid.appendChild(img);
+if (checkedPieces.length === 9) {
+  setTimeout(() => {
+    window.location.href = "https://example.com";
+  }, 1500);
+}
+
+function playVoice() {
+  const pieceId = new URLSearchParams(window.location.search).get("id");
+  const audio = new Audio(`voice${pieceId}.mp3`);
+  audio.play().catch(e => {
+    alert("음성을 재생할 수 없습니다. 브라우저가 차단했을 수 있어요.");
+    console.error(e);
+  });
 }
