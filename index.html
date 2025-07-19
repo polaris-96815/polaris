@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>POLARIS</title>
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at bottom, #0d1a2f 0%, #000 100%);
+      overflow: hidden;
+      font-family: 'Arial', sans-serif;
+      color: white;
+    }
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 2.5rem;
+      letter-spacing: 3px;
+    }
+    #constellation {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    .star {
+      width: 16px;
+      height: 16px;
+      background-color: white;
+      border-radius: 50%;
+      position: absolute;
+      opacity: 0.4;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .star.active {
+      box-shadow: 0 0 10px 5px #00ffe0;
+      opacity: 1;
+    }
+    svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    #message {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.85);
+      padding: 30px;
+      border-radius: 15px;
+      border: 2px solid #fff;
+      font-size: 1.8rem;
+      text-align: center;
+      z-index: 10;
+    }
+    #reward-img {
+      display: none;
+      margin-top: 20px;
+      max-width: 80%;
+    }
+  </style>
+</head>
+<body>
+  <h1>POLARIS</h1>
+  <div id="constellation">
+    <svg id="lines"></svg>
+    <div id="message">
+      🎉 축하합니다! <br />
+      칵테일바에 방문해서 선물을 수령해주세요!<br />
+      <img id="reward-img" src="reward.jpg" alt="보상 이미지">
+    </div>
+  </div>
+
+  <script>
+    const stars = [
+      { x: 20, y: 30 },
+      { x: 35, y: 10 },
+      { x: 50, y: 25 },
+      { x: 65, y: 15 },
+      { x: 70, y: 35 },
+      { x: 60, y: 50 },
+      { x: 40, y: 55 },
+      { x: 30, y: 40 },
+      { x: 50, y: 70 },
+    ];
+
+    const container = document.getElementById("constellation");
+    const svg = document.getElementById("lines");
+    const message = document.getElementById("message");
+    const rewardImg = document.getElementById("reward-img");
+
+    const state = Array(stars.length).fill(false);
+
+    function checkComplete() {
+      if (state.every(Boolean)) {
+        message.style.display = "block";
+        rewardImg.style.display = "block";
+      }
+    }
+
+    stars.forEach((star, i) => {
+      const el = document.createElement("div");
+      el.className = "star";
+      el.style.left = `${star.x}vw`;
+      el.style.top = `${star.y}vh`;
+
+      el.addEventListener("click", () => {
+        if (!state[i]) {
+          state[i] = true;
+          el.classList.add("active");
+          checkComplete();
+        }
+      });
+
+      container.appendChild(el);
+    });
+
+    for (let i = 0; i < stars.length - 1; i++) {
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", `${stars[i].x}vw`);
+      line.setAttribute("y1", `${stars[i].y}vh`);
+      line.setAttribute("x2", `${stars[i + 1].x}vw`);
+      line.setAttribute("y2", `${stars[i + 1].y}vh`);
+      line.setAttribute("stroke", "white");
+      line.setAttribute("stroke-width", "2");
+      svg.appendChild(line);
+    }
+  </script>
+</body>
+</html>
