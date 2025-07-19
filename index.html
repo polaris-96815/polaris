@@ -2,135 +2,182 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>POLARIS</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>별자리 도장 미션</title>
   <style>
     body {
       margin: 0;
-      background: radial-gradient(ellipse at bottom, #0d1a2f 0%, #000 100%);
-      overflow: hidden;
-      font-family: 'Arial', sans-serif;
+      background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
       color: white;
+      font-family: sans-serif;
+      overflow: hidden;
     }
-    h1 {
+
+    h1, p {
       text-align: center;
       margin-top: 20px;
-      font-size: 2.5rem;
-      letter-spacing: 3px;
-    }
-    #constellation {
+      z-index: 10;
       position: relative;
-      width: 100vw;
-      height: 100vh;
     }
-    .star {
-      width: 16px;
-      height: 16px;
-      background-color: white;
-      border-radius: 50%;
-      position: absolute;
-      opacity: 0.4;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .star.active {
-      box-shadow: 0 0 10px 5px #00ffe0;
-      opacity: 1;
-    }
-    svg {
-      position: absolute;
-      top: 0;
-      left: 0;
+
+    .stars {
       width: 100%;
       height: 100%;
-      pointer-events: none;
+      background: transparent;
+      z-index: 1;
+      position: fixed;
+      top: 0;
+      left: 0;
     }
-    #message {
-      display: none;
+
+    .twinkle {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.85);
-      padding: 30px;
-      border-radius: 15px;
-      border: 2px solid #fff;
-      font-size: 1.8rem;
+      background: white;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      animation: twinkle 2s infinite ease-in-out;
+      opacity: 0.5;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    .constellation {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      margin: 50px auto;
+      z-index: 5;
+    }
+
+    .star {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: gray;
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .star.active {
+      background-color: gold;
+      box-shadow: 0 0 10px gold;
+    }
+
+    .line {
+      position: absolute;
+      height: 2px;
+      background: white;
+      transform-origin: left center;
+    }
+
+    #reward {
+      display: none;
       text-align: center;
       z-index: 10;
+      position: relative;
     }
-    #reward-img {
-      display: none;
+
+    #reward img {
+      max-width: 300px;
       margin-top: 20px;
-      max-width: 80%;
     }
   </style>
 </head>
 <body>
-  <h1>POLARIS</h1>
-  <div id="constellation">
-    <svg id="lines"></svg>
-    <div id="message">
-      🎉 축하합니다! <br />
-      칵테일바에 방문해서 선물을 수령해주세요!<br />
-      <img id="reward-img" src="reward.jpg" alt="보상 이미지">
-    </div>
+  <div class="stars" id="starfield"></div>
+
+  <h1>별자리 도장 미션</h1>
+  <p>방문할 때마다 별이 하나씩 빛납니다.</p>
+
+  <div class="constellation" id="constellation">
+    <div class="star" style="top: 20px; left: 180px;"></div>
+    <div class="star" style="top: 60px; left: 230px;"></div>
+    <div class="star" style="top: 110px; left: 200px;"></div>
+    <div class="star" style="top: 160px; left: 240px;"></div>
+    <div class="star" style="top: 210px; left: 190px;"></div>
+    <div class="star" style="top: 260px; left: 150px;"></div>
+    <div class="star" style="top: 310px; left: 180px;"></div>
+    <div class="star" style="top: 270px; left: 230px;"></div>
+    <div class="star" style="top: 320px; left: 260px;"></div>
+  </div>
+
+  <div id="reward">
+    <p>🎉 <strong>축하합니다! 칵테일바에 방문해서 선물을 수령해주세요!</strong> 🎉</p>
+    <img src="reward.jpg" alt="보상 이미지">
   </div>
 
   <script>
-    const stars = [
-      { x: 20, y: 30 },
-      { x: 35, y: 10 },
-      { x: 50, y: 25 },
-      { x: 65, y: 15 },
-      { x: 70, y: 35 },
-      { x: 60, y: 50 },
-      { x: 40, y: 55 },
-      { x: 30, y: 40 },
-      { x: 50, y: 70 },
-    ];
+    const stars = document.querySelectorAll(".star");
+    const constellation = document.getElementById("constellation");
+    const reward = document.getElementById("reward");
+    const TOTAL_STAMPS = stars.length;
+    let stamps = parseInt(localStorage.getItem("stamps") || "0");
 
-    const container = document.getElementById("constellation");
-    const svg = document.getElementById("lines");
-    const message = document.getElementById("message");
-    const rewardImg = document.getElementById("reward-img");
-
-    const state = Array(stars.length).fill(false);
-
-    function checkComplete() {
-      if (state.every(Boolean)) {
-        message.style.display = "block";
-        rewardImg.style.display = "block";
+    for (let i = 0; i < TOTAL_STAMPS; i++) {
+      if (i < stamps) {
+        stars[i].classList.add("active");
       }
     }
 
-    stars.forEach((star, i) => {
-      const el = document.createElement("div");
-      el.className = "star";
-      el.style.left = `${star.x}vw`;
-      el.style.top = `${star.y}vh`;
+    function connectStars(index1, index2) {
+      const star1 = stars[index1].getBoundingClientRect();
+      const star2 = stars[index2].getBoundingClientRect();
+      const parent = constellation.getBoundingClientRect();
 
-      el.addEventListener("click", () => {
-        if (!state[i]) {
-          state[i] = true;
-          el.classList.add("active");
-          checkComplete();
-        }
-      });
+      const x1 = star1.left + star1.width / 2 - parent.left;
+      const y1 = star1.top + star1.height / 2 - parent.top;
+      const x2 = star2.left + star2.width / 2 - parent.left;
+      const y2 = star2.top + star2.height / 2 - parent.top;
 
-      container.appendChild(el);
+      const length = Math.hypot(x2 - x1, y2 - y1);
+      const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+      const line = document.createElement("div");
+      line.className = "line";
+      line.style.width = `${length}px`;
+      line.style.left = `${x1}px`;
+      line.style.top = `${y1}px`;
+      line.style.transform = `rotate(${angle}deg)`;
+      constellation.appendChild(line);
+    }
+
+    const connections = [
+      [0,1], [1,2], [2,3], [3,4],
+      [4,5], [5,6], [4,7], [7,8]
+    ];
+
+    window.addEventListener("load", () => {
+      connections.forEach(pair => connectStars(pair[0], pair[1]));
+      generateTwinkles();
     });
 
-    for (let i = 0; i < stars.length - 1; i++) {
-      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line.setAttribute("x1", `${stars[i].x}vw`);
-      line.setAttribute("y1", `${stars[i].y}vh`);
-      line.setAttribute("x2", `${stars[i + 1].x}vw`);
-      line.setAttribute("y2", `${stars[i + 1].y}vh`);
-      line.setAttribute("stroke", "white");
-      line.setAttribute("stroke-width", "2");
-      svg.appendChild(line);
+    // 도장 누적 (NFC 대체)
+    if (stamps < TOTAL_STAMPS) {
+      stamps++;
+      localStorage.setItem("stamps", stamps);
+      setTimeout(() => location.reload(), 300);
+    }
+
+    if (stamps >= TOTAL_STAMPS) {
+      reward.style.display = "block";
+    }
+
+    // 무작위 반짝이는 별 배경
+    function generateTwinkles() {
+      const container = document.getElementById("starfield");
+      for (let i = 0; i < 150; i++) {
+        const star = document.createElement("div");
+        star.className = "twinkle";
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.animationDelay = `${Math.random() * 5}s`;
+        container.appendChild(star);
+      }
     }
   </script>
 </body>
